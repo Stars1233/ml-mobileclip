@@ -82,13 +82,21 @@ import open_clip
 from PIL import Image
 from mobileclip.modules.common.mobileone import reparameterize_model
 
-model, _, preprocess = open_clip.create_model_and_transforms('MobileCLIP2-S0', pretrained='/path/to/mobileclip2_s0.pt')
-tokenizer = open_clip.get_tokenizer('MobileCLIP2-S0')
+model_name = "MobileCLIP2-S0"
+model_kwargs = {}
+if not (model_name.endswith("S3") or model_name.endswith("S4") or model_name.endswith("L-14")):
+    model_kwargs = {"image_mean": (0, 0, 0), "image_std": (1, 1, 1)}
+
+model, _, preprocess = open_clip.create_model_and_transforms(model_name, pretrained="/path/to/mobileclip2_s0.pt", **model_kwargs)
+tokenizer = open_clip.get_tokenizer(model_name)
+
+# Model needs to be in eval mode for inference because of batchnorm layers unlike ViTs
+model.eval()
 
 # For inference/model exporting purposes, please reparameterize first
-model = reparameterize_model(model.eval())
+model = reparameterize_model(model)
 
-image = preprocess(Image.open("docs/fig_accuracy_latency.png").convert('RGB')).unsqueeze(0)
+image = preprocess(Image.open("docs/fig_accuracy_latency.png").convert("RGB")).unsqueeze(0)
 text = tokenizer(["a diagram", "a dog", "a cat"])
 
 with torch.no_grad(), torch.cuda.amp.autocast():
@@ -102,11 +110,20 @@ with torch.no_grad(), torch.cuda.amp.autocast():
 print("Label probs:", text_probs)
 
 ```
-Variants currently available on OpenCLIP, 
- `[('MobileCLIP-S1', 'datacompdr'),
-  ('MobileCLIP-S2', 'datacompdr'),
-  ('MobileCLIP-B', 'datacompdr'),
-  ('MobileCLIP-B', 'datacompdr_lt')]`
+The following variants are directly available on OpenCLIP by passing the 
+corresponding pretrained argument and not specifying the image-mean/image-std:
+```
+'MobileCLIP-S1', pretrained='datacompdr'
+'MobileCLIP-S2', pretrained='datacompdr'
+'MobileCLIP-B', pretrained='datacompdr'
+'MobileCLIP-B', pretrained='datacompdr_lt'
+'MobileCLIP2-B', pretrained='dfndr2b'
+'MobileCLIP2-S0', pretrained='dfndr2b'
+'MobileCLIP2-S2', pretrained='dfndr2b'
+'MobileCLIP2-S3', pretrained='dfndr2b'
+'MobileCLIP2-S4', pretrained='dfndr2b'
+'MobileCLIP2-L-14', pretrained='dfndr2b'
+```
 
 <details>
 <summary>V1-only usage example</summary>
