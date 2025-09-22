@@ -194,37 +194,38 @@ Note: MobileCLIP-B(LT) is trained for 300k iterations with constant learning rat
 ## CoCa Models
 
 We release CoCa models used to generate synthetic captions in DFNDR-2B on 
-HuggingFace. These models can be downloaded using the following instructions:
+HuggingFace. These models can be downloaded using the following instructions.
+We recommend using `mscoco38k_s12m_context77` for a balanced performance.
 
 ```bash
+# context=77 models
 for model in \
-  context77 \
-  dci-complete_s12m_context128 \
-  dci-complete_s12m_context256 \
-  dci-complete_s12m_context77 \
-  dci-extended_s12m_context128 \
-  dci-extended_s12m_context256 \
-  dci-extended_s12m_context77 \
-  dci-short_s12m_context128 \
-  dci-short_s12m_context256 \
-  dci-short_s12m_context77 \
-  docci_s12m_context128 \
-  docci_s12m_context256 \
-  docci_s12m_context77 \
-  gbc10m-long_context256 \
-  gbc10m-short-relation_context256 \
-  gbc1m-long_context256 \
-  gbc1m-short_context77 \
   mscoco38k_s12m_context77 \
-  recap-coco-30k_s12m_context128 \
-  recap-coco-30k_s12m_context256 \
+  gbc1m-short_context77 \
+  docci_s12m_context77 \
+  dci-short_s12m_context77 \
+  dci-complete_s12m_context77 \
+  dci-extended_s12m_context77 \
   recap-coco-30k_s12m_context77 \
 do
   hf download apple/mobileclip2_coca_dfn2b_s13b_$model
 done
+
+# Context=256 models. These models have a higher chance of generating repeated output
+for model in \
+  docci_s12m_context256 \
+  dci-complete_s12m_context256 \
+  dci-extended_s12m_context256 \
+do
+  hf download apple/mobileclip2_coca_dfn2b_s13b_$model
+done
+
+# Base CoCa-DFN2B model that can be used for fine-tuning new CoCa models on 
+# high-quality datasets
+hf download apple/mobileclip2_coca_dfn2b_s13b_context77
 ```
 
-The following is a usage example. For models length with context lengths 128/256, copy `config.json` to `src/open_clip/model_configs/coca_ViT-L-14-context$len.json` and change the model name in below example to `coca_ViT-L-14-context$len`.
+The following is a usage example. For models length with context lengths 256, copy `config.json` to `src/open_clip/model_configs/coca_ViT-L-14-context$len.json` and change the model name in below example to `coca_ViT-L-14-context$len`.
 
 ```python
 import torch
